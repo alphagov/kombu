@@ -834,6 +834,14 @@ class Channel(virtual.Channel):
                     raise VersionMismatch(
                         'redis: {0!r} requires redis 2.10.0 or higher'.format(
                             param))
+        if conninfo.ssl:
+            # Connection(ssl={}) must be a dict containing the keys:
+            # 'ssl_cert_reqs', 'ssl_ca_certs', 'ssl_certfile', 'ssl_keyfile'
+            try:
+                connparams.update(conninfo.ssl)
+                connparams['connection_class'] = redis.SSLConnection
+            except TypeError:
+                pass
         host = connparams['host']
         if '://' in host:
             scheme, _, _, _, password, path, query = _parse_url(host)
